@@ -44,7 +44,7 @@ int main_key(const char* secret,
              uint8_t result_buffer[64],
              size_t result_buffer_size) {
   if (result_buffer_size != 64) {
-    printf("mpw::main_key result_buffer must have size 64");
+    printf("mpw::main_key result_buffer must have size 64\n");
   }
   const char scope[] = "com.lyndir.masterpassword";
   uint32_t name_size_32_big_endian = htonl((uint32_t)(name_size - 1));
@@ -52,7 +52,7 @@ int main_key(const char* secret,
     sizeof(scope) - 1 + sizeof(name_size_32_big_endian) + name_size - 1;
   char* const seed = (char*) malloc(seed_length);
   if (seed == NULL) {
-    printf("mpw::main_key Failed to allocate memmory for seed");
+    printf("mpw::main_key Failed to allocate memmory for seed\n");
     return -1;
   }
   memcpy3(seed,
@@ -78,8 +78,18 @@ int main_key(const char* secret,
 int site_key(const char* site_name,
              size_t site_name_length,
              const uint8_t key[64],
+             size_t key_size,
              uint32_t counter,
-             uint8_t buf[64]) {
+             uint8_t result_buffer[32],
+             size_t result_buffer_size) {
+  if (key_size != 64) {
+    printf("mpw::site_key: key must have size 64\n");
+    return -1;
+  }
+  if (result_buffer_size != 32) {
+    printf("mpw::site_key: result_buffer must have size 64\n");
+    return -1;
+  }
   const char scope[] = "com.lyndir.masterpassword";
   uint32_t name_size_32_big_endian = htonl((uint32_t)(site_name_length - 1));
   uint32_t counter_32_big_endian = htonl((uint32_t)(counter));
@@ -98,8 +108,7 @@ int site_key(const char* site_name,
           site_name, site_name_length - 1,
           &(counter_32_big_endian), sizeof(counter_32_big_endian));
   crypto_auth_hmacsha256_state state;
-  size_t key_length = 64;
-  if (crypto_auth_hmacsha256_init(&state, key, key_length) != 0) {
+  if (crypto_auth_hmacsha256_init(&state, key, key_size) != 0) {
     free(seed);
     return -1;
   }
@@ -107,20 +116,25 @@ int site_key(const char* site_name,
     free(seed);
     return -1;
   }
-  int return_code = crypto_auth_hmacsha256_final(&state, buf);
+  int return_code = crypto_auth_hmacsha256_final(&state, result_buffer);
   free(seed);
   return return_code;
 }
 
 int site_password(uint8_t site_key[32],
+                  size_t site_key_size,
                   const char* result_type,
                   size_t result_type_size,
                   char* result_buffer,
                   size_t result_buffer_size){
+  if (site_key_size != 32) {
+    printf("mpw:site_password site_key must have size 32\n");
+    return -1;
+  }
   int num_templates_for_class = number_of_templates(result_type,
                                                     result_type_size);
   if (num_templates_for_class == 0) {
-    printf("mpw::password Template does not exists.");
+    printf("mpw::password Template does not exists.\n");
     return -1;
   }
   char template_buffer[MAX_SIZE_TEMPLATE];
@@ -129,12 +143,12 @@ int site_password(uint8_t site_key[32],
                site_key[0] % num_templates_for_class,
                template_buffer,
                MAX_SIZE_TEMPLATE) != 0) {
-    printf("Could not find template");
+    printf("Could not find template\n");
     return -1;
   }
   size_t template_length = strnlen(template_buffer, MAX_SIZE_TEMPLATE);
   if (result_buffer_size < template_length) {
-    printf("mpw::password Buffer not large enough to hold password.");
+    printf("mpw::password Buffer not large enough to hold password.\n");
     return -1;
   }
   char pass_chars[MAX_LENGTH_CHARACTERS_CATEGORY_STRING];

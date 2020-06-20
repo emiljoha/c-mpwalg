@@ -71,9 +71,10 @@ int main_key(const char* secret,
 int site_key(const char* site_name,
              size_t site_name_length,
              const uint8_t key[64],
+             size_t key_size,
              uint32_t counter,
-             uint8_t buf[32]);
-
+             uint8_t result_buffer[64],
+             size_t result_buffer_size);
 /**
    Phase 3: Your site password 
 

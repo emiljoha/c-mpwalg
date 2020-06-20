@@ -1,3 +1,3 @@
 all:
-	gcc mpw.c main.c -lsodium
+	gcc mpw.c templates.c main.c -lsodium
 	./a.out

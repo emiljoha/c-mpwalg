@@ -3,6 +3,8 @@
 #include <sodium.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
+#include "templates.h"
 
 void hex(const uint8_t* const buf, size_t buf_size) {
   for (size_t i = 0; i < buf_size; i++)
@@ -106,4 +108,42 @@ int site_key(const char* site_name,
   int return_code = crypto_auth_hmacsha256_final(&state, buf);
   free(seed);
   return return_code;
+}
+
+
+int password(uint8_t site_key[32],
+             const char* template_class,
+             size_t template_class_size,
+             char* password_buff,
+             size_t password_buff_size) {
+  int num_templates_for_class = number_of_templates(template_class,
+                                                    template_class_size);
+  if (num_templates_for_class == 0) {
+    printf("mpw::password Template does not exists.");
+    return -1;
+  }
+  int template_number_to_use = site_key[0] % num_templates_for_class;
+  char choosen_template[MAX_SIZE_TEMPLATE];
+  if (template(template_class,
+               template_class_size,
+               template_number_to_use,
+               choosen_template,
+               MAX_SIZE_TEMPLATE) != 0) {
+    printf("Could not find template");
+    return -1;
+  }
+  size_t template_length = strnlen(choosen_template, MAX_SIZE_TEMPLATE);
+  if (password_buff_size < template_length) {
+    printf("mpw::password Buffer not large enough to hold password.");
+    return -1;
+  }
+  char pass_chars[MAX_LENGTH_CHARACTERS_CATEGORY_STRING];
+  for (size_t i = 0; i < template_length; i++) {
+    template_characters(choosen_template[i],
+                        pass_chars,
+                        MAX_LENGTH_CHARACTERS_CATEGORY_STRING);
+    int pass_char_len = strnlen(pass_chars, MAX_LENGTH_CHARACTERS_CATEGORY_STRING);
+    password_buff[i] = pass_chars[site_key[i+1] % pass_char_len];
+  }
+  return 0;
 }

@@ -70,3 +70,52 @@ int site_key(const char* site_name,
              const uint8_t key[64],
              uint32_t counter,
              uint8_t buf[32]);
+
+/**
+   Phase 3: Your site password 
+
+   Your site password is an identifier derived from your site key in
+   compoliance with the site’s password policy.
+
+   The purpose of this step is to render the site’s cryptographic key into a
+   format that the site’s password input will accept.
+
+   Master Password declares several site password formats and uses these
+   pre-defined password “templates” to render the site key legible.
+    
+   ´´´
+   template = templates[ <site key>[0] % LEN( templates ) ]
+    
+   for i in 0..LEN( template ) 
+   passChars = templateChars[ template[i] ]2
+   passWord[i] = passChars[ <site key>[i+1] % LEN( passChars ) ] 
+
+   We resolve a template to use for the password from the site key’s first
+   byte.  As we iterate the template, we use it to translate site key bytes
+   into password characters.  The result is a site password in the form
+   defined by the site template scoped to our site key.
+
+   This password is then used to authenticate the user for his account at
+   this site.
+**/
+
+int password(uint8_t site_key[32],
+             const char* template_class,
+             size_t template_class_size,
+             char* password_buff,
+             size_t password_buff_size);
+
+/**
+   Output Templates:
+   In an effort to enforce increased password entropy, a common consensus has
+   developed among account administrators that passwords should adhere to
+   certain arbitrary password policies.  These policies enforce certain rules
+   which must be honoured for an account password to be deemed acceptable.
+
+   As a result of these enforcement practices, Master Password’s site key
+   output must necessarily adhere to these types of policies.  Since password
+   policies are governed by site administrators and not standardized, Master
+   Password defines several password templates to make a best-effort attempt at
+   generating site passwords that conform to these policies while also keeping
+   its output entropy as high as possible under the constraints.
+**/

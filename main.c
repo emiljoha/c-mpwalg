@@ -8,8 +8,11 @@
 int main() {
   const char password[] = "password";
   const char name[] = "name";
-  uint8_t result[64];
-  key(password, sizeof(password), name, sizeof(name), result);
-  //printf("Result:\n");
-  hex(result, 64);
+  const char site_name[] = "example.org";
+  uint32_t counter = 1;
+  uint8_t identity[64];
+  key(password, sizeof(password), name, sizeof(name), identity);
+  uint8_t site_identity[32];
+  site_key(site_name, sizeof(site_name), identity, counter, site_identity);
+  hex(site_identity, 32);
 }

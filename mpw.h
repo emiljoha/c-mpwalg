@@ -39,3 +39,34 @@ int key(const char* password,
         const char* name,
         uint32_t name_size,
         uint8_t* buf);
+
+/**
+   Phase 2: Your site key "com.lyndir.masterpassword"
+
+   Your site key is a derivative from your master key when it is used to
+   unlock the door to a specific site. Your site key is the result of two
+   components:
+
+   1.Your <site name> (identification)
+   2.Your <masterkey> (authentication)
+   3.Your <site counter> 
+
+   Your master key ensures only your identity has access to this key and your
+   site name scopes the key to your site.  The site counter ensures you can
+   easily create new keys for the site should a key become
+   compromised. Together, they create a cryptographic identifier that is
+   unique to your account at this site.
+
+   siteKey = HMAC-SHA-256( key, seed )
+   key = <master key>
+   seed = scope . LEN(<site name>) . <site name> . <counter>
+
+   We employ the HMAC-SHA-256 cryptographic function to derive a 32-byte
+   cryptographic site key from the from the site name and master key scoped
+   to a given counter value.
+**/
+int site_key(const char* site_name,
+             size_t site_name_length,
+             const uint8_t key[64],
+             uint32_t counter,
+             uint8_t buf[32]);

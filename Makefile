@@ -1,3 +1,3 @@
 all:
-	gcc main.c -lsodium 
+	gcc mpw.c main.c -lsodium
 	./a.out

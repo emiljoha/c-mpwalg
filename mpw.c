@@ -10,6 +10,31 @@ void hex(const uint8_t* const buf, size_t buf_size) {
   printf("\n");
 }
 
+void memcpy3(void* destination,
+             const void* a, size_t a_size,
+             const void* b, size_t b_size,
+             const void* c, size_t c_size) {
+  memcpy(destination,
+         a, a_size);
+  memcpy(destination + a_size,
+         b, b_size);
+  memcpy(destination + a_size + b_size,
+         c, c_size);
+}
+
+void memcpy4(void* destination,
+             const void* a, size_t a_size,
+             const void* b, size_t b_size,
+             const void* c, size_t c_size,
+             const void* d, size_t d_size) {
+  memcpy3(destination,
+          a, a_size,
+          b, b_size,
+          c, c_size);
+  memcpy(destination + a_size + b_size + c_size,
+         d, d_size);
+}
+
 int key(const char* password,
         size_t password_size,
         const char* name,
@@ -25,13 +50,10 @@ int key(const char* password,
   if (seed == NULL) {
     return -1;
   }
-  memcpy(seed, scope, sizeof(scope) - 1);
-  memcpy(seed + sizeof(scope) - 1,
-         &(name_size_32_big_endian),
-         sizeof(name_size_32_big_endian));
-  memcpy(seed + sizeof(scope) - 1 + sizeof(name_size_32_big_endian),
-         name,
-         name_size - 1);
+  memcpy3(seed,
+          scope, sizeof(scope) - 1,
+          &(name_size_32_big_endian), sizeof(name_size_32_big_endian),
+          name, name_size - 1);
   uint64_t N = 32768U;
   uint32_t r = 8U;
   uint32_t p = 2U;
@@ -66,16 +88,11 @@ int site_key(const char* site_name,
   if (seed == NULL) {
     return -1;
   }
-  memcpy(seed, scope, sizeof(scope) - 1);
-  memcpy(seed + sizeof(scope) - 1,
-         &(name_size_32_big_endian),
-         sizeof(name_size_32_big_endian));
-  memcpy(seed + sizeof(scope) - 1 + sizeof(name_size_32_big_endian),
-         site_name,
-         site_name_length - 1);
-  memcpy(seed + seed_length - sizeof(counter_32_big_endian),
-         &(counter_32_big_endian),
-         sizeof(counter_32_big_endian));
+  memcpy4(seed,
+          scope, sizeof(scope) - 1,
+          &(name_size_32_big_endian), sizeof(name_size_32_big_endian),
+          site_name, site_name_length - 1,
+          &(counter_32_big_endian), sizeof(counter_32_big_endian));
   crypto_auth_hmacsha256_state state;
   size_t key_length = 64;
   if (crypto_auth_hmacsha256_init(&state, key, key_length) != 0) {

@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#define MAX_SIZE_PASSWORD 21
+
 void hex(const uint8_t* const buf, size_t buf_size);
 
 /**
@@ -34,11 +36,12 @@ void hex(const uint8_t* const buf, size_t buf_size);
    LEN(<name>) is represented as a 32 bit- big-endian-, unsigned-integer.
 
 **/
-int key(const char* password,
-        size_t password_size,
-        const char* name,
-        uint32_t name_size,
-        uint8_t* buf);
+int main_key(const char* secret,
+             size_t secret_size,
+             const char* name,
+             size_t name_size,
+             uint8_t* result_buffer,
+             size_t result_buffer_size);
 
 /**
    Phase 2: Your site key "com.lyndir.masterpassword"
@@ -99,11 +102,11 @@ int site_key(const char* site_name,
    this site.
 **/
 
-int password(uint8_t site_key[32],
-             const char* template_class,
-             size_t template_class_size,
-             char* password_buff,
-             size_t password_buff_size);
+int site_password(uint8_t site_key[32],
+                  const char* result_type,
+                  size_t result_type_size,
+                  char* result_buffer,
+                  size_t result_buffer_size);
 
 /**
    Output Templates:

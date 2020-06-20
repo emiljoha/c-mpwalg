@@ -37,19 +37,22 @@ void memcpy4(void* destination,
          d, d_size);
 }
 
-int key(const char* password,
-        size_t password_size,
-        const char* name,
-        size_t name_size,
-        uint8_t buf[64]) {
+int main_key(const char* secret,
+             size_t secret_length,
+             const char* name,
+             size_t name_size,
+             uint8_t result_buffer[64],
+             size_t result_buffer_size) {
+  if (result_buffer_size != 64) {
+    printf("mpw::main_key result_buffer must have size 64");
+  }
   const char scope[] = "com.lyndir.masterpassword";
   uint32_t name_size_32_big_endian = htonl((uint32_t)(name_size - 1));
-  size_t seed_length = \
-    sizeof(scope) - 1 + \
-    sizeof(name_size_32_big_endian) + \
-    name_size - 1;
+  size_t seed_length =
+    sizeof(scope) - 1 + sizeof(name_size_32_big_endian) + name_size - 1;
   char* const seed = (char*) malloc(seed_length);
   if (seed == NULL) {
+    printf("mpw::main_key Failed to allocate memmory for seed");
     return -1;
   }
   memcpy3(seed,
@@ -59,16 +62,15 @@ int key(const char* password,
   uint64_t N = 32768U;
   uint32_t r = 8U;
   uint32_t p = 2U;
-  size_t buflen = 64;
-  int code = crypto_pwhash_scryptsalsa208sha256_ll((uint8_t*)password,
-                                                   password_size - 1,
+  int code = crypto_pwhash_scryptsalsa208sha256_ll((uint8_t*)secret,
+                                                   secret_length,
                                                    (uint8_t*)seed,
                                                    seed_length,
                                                    N,
                                                    r,
                                                    p,
-                                                   buf,
-                                                   buflen);
+                                                   result_buffer,
+                                                   result_buffer_size);
   free(seed);
   return code;
 }
@@ -110,40 +112,38 @@ int site_key(const char* site_name,
   return return_code;
 }
 
-
-int password(uint8_t site_key[32],
-             const char* template_class,
-             size_t template_class_size,
-             char* password_buff,
-             size_t password_buff_size) {
-  int num_templates_for_class = number_of_templates(template_class,
-                                                    template_class_size);
+int site_password(uint8_t site_key[32],
+                  const char* result_type,
+                  size_t result_type_size,
+                  char* result_buffer,
+                  size_t result_buffer_size){
+  int num_templates_for_class = number_of_templates(result_type,
+                                                    result_type_size);
   if (num_templates_for_class == 0) {
     printf("mpw::password Template does not exists.");
     return -1;
   }
-  int template_number_to_use = site_key[0] % num_templates_for_class;
-  char choosen_template[MAX_SIZE_TEMPLATE];
-  if (template(template_class,
-               template_class_size,
-               template_number_to_use,
-               choosen_template,
+  char template_buffer[MAX_SIZE_TEMPLATE];
+  if (template(result_type,
+               result_type_size,
+               site_key[0] % num_templates_for_class,
+               template_buffer,
                MAX_SIZE_TEMPLATE) != 0) {
     printf("Could not find template");
     return -1;
   }
-  size_t template_length = strnlen(choosen_template, MAX_SIZE_TEMPLATE);
-  if (password_buff_size < template_length) {
+  size_t template_length = strnlen(template_buffer, MAX_SIZE_TEMPLATE);
+  if (result_buffer_size < template_length) {
     printf("mpw::password Buffer not large enough to hold password.");
     return -1;
   }
   char pass_chars[MAX_LENGTH_CHARACTERS_CATEGORY_STRING];
   for (size_t i = 0; i < template_length; i++) {
-    template_characters(choosen_template[i],
+    template_characters(template_buffer[i],
                         pass_chars,
                         MAX_LENGTH_CHARACTERS_CATEGORY_STRING);
     int pass_char_len = strnlen(pass_chars, MAX_LENGTH_CHARACTERS_CATEGORY_STRING);
-    password_buff[i] = pass_chars[site_key[i+1] % pass_char_len];
+    result_buffer[i] = pass_chars[site_key[i+1] % pass_char_len];
   }
   return 0;
 }

@@ -6,6 +6,21 @@
 #include "mpw.h"
 
 int main() {
+  char password_buffer[MAX_SIZE_PASSWORD];
+  password("password",
+           sizeof("password"),
+           "example.org",
+           sizeof("example.org"),
+           "name",
+           sizeof("name"),
+           "Long",
+           sizeof("Long"),
+           1,
+           password_buffer,
+           sizeof(password_buffer));
+  printf("%s\n", password_buffer);
+  return 0;
+  /*
   const char secret[] = "password";
   const char name[] = "name";
   const char site_name[] = "example.org";
@@ -23,4 +38,5 @@ int main() {
                 site_password_buffer,
                 MAX_SIZE_PASSWORD);
   printf("%s\n", site_password_buffer);
+  */
 }

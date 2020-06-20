@@ -161,3 +161,47 @@ int site_password(uint8_t site_key[32],
   }
   return 0;
 }
+
+int password(const char* secret,
+             size_t secret_size,
+             const char* site_name,
+             size_t site_name_size,
+             const char* full_name,
+             size_t full_name_size,
+             const char* site_result_type,
+             size_t site_result_type_size,
+             size_t counter,
+             char* result_buffer,
+             size_t result_buffer_size) {
+  uint8_t main_key_buffer[64];
+  if (main_key(secret,
+               secret_size,
+               full_name,
+               full_name_size,
+               main_key_buffer,
+               sizeof(main_key_buffer)) != 0) {
+    printf("mpw:password Failed to generate main key\n");
+    return -1;
+  }
+  uint8_t site_key_buffer[32];
+  if (site_key(site_name,
+               site_name_size,
+               main_key_buffer,
+               sizeof(main_key_buffer),
+               counter,
+               site_key_buffer,
+               sizeof(site_key_buffer)) != 0) {
+    printf("mpw:password Failed to generate site key\n");
+    return -1;
+  }
+  if (site_password(site_key_buffer,
+                    sizeof(site_key_buffer),
+                    site_result_type,
+                    site_result_type_size,
+                    result_buffer,
+                    result_buffer_size) != 0) {
+    printf("mpw:password Failed to generate site password\n");
+    return -1;
+  }
+  return 0;
+}

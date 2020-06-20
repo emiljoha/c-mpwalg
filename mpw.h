@@ -5,6 +5,17 @@
 
 void hex(const uint8_t* const buf, size_t buf_size);
 
+int password(const char* secret,
+             size_t secret_size,
+             const char* site_name,
+             size_t site_name_size,
+             const char* full_name,
+             size_t full_name_size,
+             const char* site_result_type,
+             size_t site_result_type_size,
+             size_t counter,
+             char* result_buffer,
+             size_t result_buffer_size);
 /**
    Phase 1: Your identity
 

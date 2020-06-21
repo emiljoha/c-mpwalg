@@ -1,5 +1,8 @@
 # c-mpwalg
-C implementation of the Masterpassword Algorithm. Includes thin python bindings.
+C implementation of the [Masterpassword
+Algorithm](https://masterpassword.lyndir.com/). Includes thin python bindings.
+
+
 
 ## Get password from secret, site, name, type, and counter.
 

@@ -47,8 +47,8 @@ set of parameters.
 Your identity is defined by your key. This key unlocks all of your doors.
 Your master key is the cryptographic result of two components:
 
-1.Your <name> (identification)
-2.Your <master password> (authentication)
+1. Your <name> (identification)
+2. Your <master password> (authentication)
 
 Your master password is your personal secret and your name scopes that secret
 to your identity.  Together, they create a cryptographic identifier that
@@ -65,8 +65,8 @@ dkLen = 64
 
 ```
 
-scope and name are coded as UTF-8.
-LEN(<name>) is represented as a 32 bit- big-endian-, unsigned-integer.
+scope and name are coded as UTF-8. `LEN(<name>)` is represented as a 32 bit-
+big-endian-, unsigned-integer.
 
 ### Corresponding C function.
 ``` c
@@ -84,9 +84,9 @@ Your site key is a derivative from your master key when it is used to
 unlock the door to a specific site. Your site key is the result of two
 components:
 
-1.Your <site name> (identification)
-2.Your <masterkey> (authentication)
-3.Your <site counter> 
+1. Your <site name> (identification)
+2. Your <masterkey> (authentication)
+3. Your <site counter> 
 
 Your master key ensures only your identity has access to this key and your
 site name scopes the key to your site.  The site counter ensures you can
@@ -94,9 +94,12 @@ easily create new keys for the site should a key become
 compromised. Together, they create a cryptographic identifier that is
 unique to your account at this site.
 
+```
 siteKey = HMAC-SHA-256( key, seed )
 key = <master key>
 seed = scope . LEN(<site name>) . <site name> . <counter>
+```
+
 
 We employ the HMAC-SHA-256 cryptographic function to derive a 32-byte
 cryptographic site key from the from the site name and master key scoped
@@ -129,8 +132,8 @@ pre-defined password “templates” to render the site key legible.
 template = templates[ <site key>[0] % LEN( templates ) ]
 
 for i in 0..LEN( template ) 
-passChars = templateChars[ template[i] ]2
-passWord[i] = passChars[ <site key>[i+1] % LEN( passChars ) ] 
+  passChars = templateChars[ template[i] ]2
+  passWord[i] = passChars[ <site key>[i+1] % LEN( passChars ) ] 
 ```
 
 We resolve a template to use for the password from the site key’s first

@@ -3,6 +3,7 @@ C implementation of the Masterpassword Algorithm. Includes thin python bindings.
 
 ## Get password from secret, site, name, type, and counter.
 
+### C
 Password is written to result_buffer. Returns -1 if somethings goes wrong.
 ``` c
 int password(const char* secret,
@@ -17,6 +18,20 @@ int password(const char* secret,
              char* result_buffer,
              size_t result_buffer_size);
 ```
+### Python
+
+Same as the c api except no sizes, nor a result buffer is neeeded.
+
+Will throw an exception if something goes wrong instead of returning -1.
+
+``` python
+def password(secret,
+             site_name,
+             full_name,
+             site_result_type,
+             counter)
+```
+
 
 # Algorithm documentation.
 
